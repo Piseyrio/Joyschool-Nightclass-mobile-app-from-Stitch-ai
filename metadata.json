@@ -1,0 +1,6 @@
+{
+  "name": "Joy School Management Portal",
+  "description": "Comprehensive school administration registrar offering biometric attendance monitoring and financial billing systems.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
