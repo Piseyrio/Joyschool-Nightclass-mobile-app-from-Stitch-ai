@@ -81,3 +81,14 @@ export interface AcademicSubject {
   credits: number;
   department: string;
 }
+
+export interface AdminProfile {
+  name: string;
+  role: string;
+  email: string;
+  phone: string;
+  office: string;
+  employeeId: string;
+  avatar: string;
+}
+

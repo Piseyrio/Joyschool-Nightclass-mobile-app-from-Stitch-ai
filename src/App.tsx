@@ -18,9 +18,10 @@ import TransactionsView from './components/TransactionsView';
 import AddView from './components/AddView';
 import CategoriesView from './components/CategoriesView';
 import SettingsView from './components/SettingsView';
+import ProfileView from './components/ProfileView';
 
 // Decoupled types & seed data
-import { Student, Invoice, Schedule, FeeType, ClassSession, AcademicSubject } from './types';
+import { Student, Invoice, Schedule, FeeType, ClassSession, AcademicSubject, AdminProfile } from './types';
 import { 
   INITIAL_STUDENTS, 
   INITIAL_INVOICES, 
@@ -32,10 +33,21 @@ import {
 
 export default function App() {
   // Current active navigation tab
-  const [activeTab, setActiveTab] = useState<'home' | 'transactions' | 'add' | 'categories' | 'settings'>('home');
+  const [activeTab, setActiveTab ] = useState<'home' | 'transactions' | 'add' | 'categories' | 'settings' | 'profile'>('home');
   
   // Custom router state to pass automatic form selection to the Add tab
   const [addTabFormKey, setAddTabFormKey] = useState<string | null>(null);
+
+  // Core Administrative Profile State (lifted for persistent profile edits across tabs)
+  const [adminInfo, setAdminInfo] = useState<AdminProfile>({
+    name: 'ស្រីនុត ហាង/苏玲娜',
+    role: 'Super Admin',
+    email: 'JSNC-20@gmail.com',
+    phone: '090222753',
+    office: 'ដង្កោ',
+    employeeId: 'JSNC-20',
+    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBJEZ3d8_SqgGKRrJ2rDCsbd-pkXksBpQK22cKrKh9i7fiRMzwbebmLQ_CqCicyWVddi_Xl4d4jOeNFMiyQpjStDwjFNaw0QOYaqMBTb8lt8gzC7pFoU6YsChW6zDs6yJK_tru-2QdyILRqmgy8-kGGLHMYFPvsZJzqlInyMVTtDkPOHeC6Iv-hT7_wsYrsIcmnIDr0vjYhL9cR2cVxw4KyQ4Ikg3-9EW4b73z0P2gKruA8n6m9jmiD__QMI_IolSmX2u-h3J1j77g6'
+  });
 
   // Core Persistent States representing the ERP databases
   const [students, setStudents] = useState<Student[]>(INITIAL_STUDENTS);
@@ -239,7 +251,24 @@ export default function App() {
           />
         );
       case 'settings':
-        return <SettingsView />;
+        return (
+          <SettingsView 
+            adminInfo={adminInfo} 
+            onUpdateAdminInfo={setAdminInfo} 
+            onEditProfileClick={() => {
+              setActiveTab('profile');
+              setAddTabFormKey(null);
+            }}
+          />
+        );
+      case 'profile':
+        return (
+          <ProfileView 
+            adminInfo={adminInfo} 
+            onUpdateAdminInfo={setAdminInfo} 
+            onNavigateTab={setActiveTab}
+          />
+        );
     }
   };
 
@@ -282,17 +311,17 @@ export default function App() {
 
             <button 
               type="button"
-              onClick={() => { setActiveTab('settings'); setAddTabFormKey(null); }}
+              onClick={() => { setActiveTab('profile'); setAddTabFormKey(null); }}
               className={`w-10 h-10 rounded-full overflow-hidden border-2 transition-all cursor-pointer ${
-                activeTab === 'settings' 
+                activeTab === 'profile' 
                   ? 'border-violet-700 ring-2 ring-violet-200 scale-105' 
                   : 'border-slate-200 hover:scale-105 hover:border-violet-500'
               }`}
-              title="Admin Profile"
+              title={`${adminInfo.name} - Profile`}
             >
               <img 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF0A6h66Sg9jP0X7SPhfT7fU1_aN3V8N4Bv1HqPf9eE5i7j8sX5C6b8_7D2wJ9X3sW6J3f9m4H5f7Y8wP5iY6d5W8W" 
-                alt="Dr. Samuel Richardson" 
+                src={adminInfo.avatar} 
+                alt={adminInfo.name} 
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover" 
               />

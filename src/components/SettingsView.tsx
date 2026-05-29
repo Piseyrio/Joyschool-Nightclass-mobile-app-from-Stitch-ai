@@ -18,24 +18,49 @@ import {
   MessageSquare,
   LogOut,
   X,
-  Check
+  Check,
+  Calendar,
+  Star,
+  Download,
+  Printer,
+  History,
+  Cake,
+  Users,
+  Edit2
 } from 'lucide-react';
 
-export default function SettingsView() {
-  // Persistent or editable Admin state
-  const [adminInfo, setAdminInfo] = useState({
-    name: 'Dr. Samuel Richardson',
-    role: 'Super Admin',
-    email: 's.richardson@joyschool.edu',
-    phone: '+1 (555) 234-8890',
-    office: 'Administrative Wing, Floor 4',
-    employeeId: 'ADM-99230-SR',
-    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDF0A6h66Sg9jP0X7SPhfT7fU1_aN3V8N4Bv1HqPf9eE5i7j8sX5C6b8_7D2wJ9X3sW6J3f9m4H5f7Y8wP5iY6d5W8W'
-  });
+import { AdminProfile } from '../types';
 
+interface SettingsViewProps {
+  adminInfo: AdminProfile;
+  onUpdateAdminInfo: React.Dispatch<React.SetStateAction<AdminProfile>>;
+  onEditProfileClick?: () => void;
+}
+
+export default function SettingsView({ adminInfo, onUpdateAdminInfo, onEditProfileClick }: SettingsViewProps) {
   // Editor modal state
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ ...adminInfo });
+
+  // Custom Cambodian student profile state matching user template
+  const [profileForm, setProfileForm] = useState({
+    nameEn: 'ស្រីនុត',
+    nameKh: 'ហាង/苏玲娜',
+    code: 'JSNC-20',
+    biometric: '20',
+    birthday: 'Aug 11, 2022',
+    phone: '090222753',
+    email: 'JSNC-20@gmail.com',
+    fatherName: 'Yes',
+    motherName: 'Yes',
+    address: 'ដង្កោ',
+    classLevel: 'C.5 Fan Xia',
+    subject: 'Hsk 5 Fan Xai',
+    teacher: 'Fan xia'
+  });
+
+  const [innerEditMode, setInnerEditMode] = useState(false);
+  const [cardToast, setCardToast] = useState(false);
 
   // Help support detail overlay states
   const [activeHelpArea, setActiveHelpArea] = useState<'kb' | 'chat' | null>(null);
@@ -78,7 +103,7 @@ export default function SettingsView() {
 
   const saveProfileChanges = (e: React.FormEvent) => {
     e.preventDefault();
-    setAdminInfo({ ...editForm });
+    onUpdateAdminInfo({ ...editForm });
     setIsEditing(false);
     triggerFeedback("Your administrative profile was updated successfully.");
   };
@@ -134,8 +159,12 @@ export default function SettingsView() {
           <button 
             type="button"
             onClick={() => {
-              setEditForm({ ...adminInfo });
-              setIsEditing(true);
+              if (onEditProfileClick) {
+                onEditProfileClick();
+              } else {
+                setEditForm({ ...adminInfo });
+                setIsEditing(true);
+              }
             }}
             className="flex-1 py-3 px-4 bg-violet-900 text-white rounded-xl text-xs font-bold shadow-md hover:bg-violet-950 transition-all active:scale-95 cursor-pointer"
           >
@@ -143,7 +172,13 @@ export default function SettingsView() {
           </button>
           <button 
             type="button"
-            onClick={() => triggerFeedback("Advanced database security parameters are locked by Cloud Run.")}
+            onClick={() => {
+              if (onEditProfileClick) {
+                onEditProfileClick();
+              } else {
+                triggerFeedback("Advanced database security parameters are locked by Cloud Run.");
+              }
+            }}
             className="flex-1 py-3 px-4 bg-slate-100/80 hover:bg-slate-200/80 text-slate-800 rounded-xl text-xs font-bold border border-slate-200/60 transition-all active:scale-95 cursor-pointer"
           >
             Account Settings
@@ -369,98 +404,544 @@ export default function SettingsView() {
 
       {/* --- EDIT PROFILE SHEETS MODAL (OVERLAY) --- */}
       {isEditing && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-          <div className="w-full max-w-[500px] bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 animate-slide-down">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="w-full max-w-[520px] bg-gradient-to-b from-[#f9f9ff] to-[#eef2ff] rounded-3xl shadow-2xl border border-white/60 animate-slide-down flex flex-col h-[90vh] max-h-[850px] relative">
             
-            <div className="flex justify-between items-center pb-4 mb-4 border-b border-slate-100">
-              <h3 className="font-extrabold text-base text-slate-900">Edit Admin Profile Information</h3>
+            {/* Header top-bar */}
+            <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200/50 bg-white/60 backdrop-blur-md sticky top-0 z-30 rounded-t-3xl">
+              <div>
+                <h3 className="font-extrabold text-sm text-slate-900">Student Profile Settings</h3>
+                <p className="text-[10px] text-slate-500 font-semibold">Joy School Night Class Terminal</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  type="button" 
+                  onClick={() => setInnerEditMode(!innerEditMode)}
+                  className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                    innerEditMode 
+                      ? 'bg-violet-900 text-white hover:bg-violet-950' 
+                      : 'bg-violet-100 text-violet-700 hover:bg-violet-200'
+                  }`}
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                  {innerEditMode ? 'View Profile' : 'Edit Details'}
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => { setIsEditing(false); setInnerEditMode(false); }}
+                  className="p-1.5 rounded-full text-slate-400 hover:text-slate-800 cursor-pointer hover:bg-slate-100 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Scrollable content container matching user's exact mockup */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-6 pt-4">
+              
+              {/* Optional Local PDF Download Banner */}
+              {cardToast && (
+                <div className="bg-violet-900 text-white px-4 py-3 rounded-2xl shadow-lg border border-violet-800 font-semibold text-xs flex items-center gap-2 animate-slide-down">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>Generating high-resolution security ID badge PDF...</span>
+                </div>
+              )}
+
+              {innerEditMode ? (
+                /* --- FULL INTERACTIVE CHANGE FORM MODE --- */
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    // Sync up with parental adminInfo state
+                    onUpdateAdminInfo({
+                      name: `${profileForm.nameEn} ${profileForm.nameKh}`,
+                      role: 'Super Admin',
+                      email: profileForm.email,
+                      phone: profileForm.phone,
+                      office: profileForm.address,
+                      employeeId: profileForm.code,
+                      avatar: adminInfo.avatar
+                    });
+                    setInnerEditMode(false);
+                    triggerFeedback("Student profile details updated successfully!");
+                  }}
+                  className="space-y-4 bg-white/60 p-5 rounded-2xl border border-slate-200/50"
+                >
+                  <h4 className="text-xs font-black text-violet-800 uppercase tracking-widest border-b border-slate-100 pb-2">Modify Personal Variables</h4>
+                  
+                  {/* Name EN */}
+                  <div>
+                    <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wider mb-1.5">First Name En / Khmer</label>
+                    <input 
+                      type="text" 
+                      value={profileForm.nameEn} 
+                      required
+                      onChange={(e) => setProfileForm(prev => ({ ...prev, nameEn: e.target.value }))}
+                      className="w-full rounded-xl border-slate-200 text-xs font-bold text-slate-800 p-3 focus:ring-violet-500 focus:border-violet-500" 
+                    />
+                  </div>
+
+                  {/* Slashed Last Name / Khmer translation */}
+                  <div>
+                    <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wider mb-1.5 font-sans">Surname / Khmer Slashed Translation</label>
+                    <input 
+                      type="text" 
+                      value={profileForm.nameKh} 
+                      required
+                      onChange={(e) => setProfileForm(prev => ({ ...prev, nameKh: e.target.value }))}
+                      className="w-full rounded-xl border-[#d3ccff] text-xs font-bold text-slate-800 p-3 focus:ring-violet-500 focus:border-violet-500" 
+                    />
+                  </div>
+
+                  {/* Birthday */}
+                  <div>
+                    <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wider mb-1.5">Birthday</label>
+                    <input 
+                      type="text" 
+                      value={profileForm.birthday} 
+                      required
+                      onChange={(e) => setProfileForm(prev => ({ ...prev, birthday: e.target.value }))}
+                      className="w-full rounded-xl border-slate-200 text-xs font-bold text-slate-800 p-3 focus:ring-violet-500 focus:border-violet-500" 
+                    />
+                  </div>
+
+                  {/* Phone */}
+                  <div>
+                    <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wider mb-1.5">Phone Contact</label>
+                    <input 
+                      type="text" 
+                      value={profileForm.phone} 
+                      required
+                      onChange={(e) => setProfileForm(prev => ({ ...prev, phone: e.target.value }))}
+                      className="w-full rounded-xl border-slate-200 text-xs font-bold text-slate-800 p-3 focus:ring-violet-500 focus:border-violet-500" 
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wider mb-1.5">Account Email</label>
+                    <input 
+                      type="email" 
+                      value={profileForm.email} 
+                      required
+                      onChange={(e) => setProfileForm(prev => ({ ...prev, email: e.target.value }))}
+                      className="w-full rounded-xl border-slate-200 text-xs font-bold text-slate-800 p-3 focus:ring-violet-500 focus:border-violet-500" 
+                    />
+                  </div>
+
+                  {/* Father's Name */}
+                  <div>
+                    <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wider mb-1.5">Father's Name</label>
+                    <input 
+                      type="text" 
+                      value={profileForm.fatherName} 
+                      required
+                      onChange={(e) => setProfileForm(prev => ({ ...prev, fatherName: e.target.value }))}
+                      className="w-full rounded-xl border-slate-200 text-xs font-bold text-slate-800 p-3 focus:ring-violet-500 focus:border-violet-500" 
+                    />
+                  </div>
+
+                  {/* Mother's Name */}
+                  <div>
+                    <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wider mb-1.5">Mother's Name</label>
+                    <input 
+                      type="text" 
+                      value={profileForm.motherName} 
+                      required
+                      onChange={(e) => setProfileForm(prev => ({ ...prev, motherName: e.target.value }))}
+                      className="w-full rounded-xl border-slate-200 text-xs font-bold text-slate-800 p-3 focus:ring-violet-500 focus:border-violet-500" 
+                    />
+                  </div>
+
+                  {/* Address */}
+                  <div>
+                    <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wider mb-1.5">Primary Address (Khmer)</label>
+                    <input 
+                      type="text" 
+                      value={profileForm.address} 
+                      required
+                      onChange={(e) => setProfileForm(prev => ({ ...prev, address: e.target.value }))}
+                      className="w-full rounded-xl border-slate-200 text-xs font-bold text-slate-800 p-3 focus:ring-violet-500 focus:border-violet-500" 
+                    />
+                  </div>
+
+                  {/* Code */}
+                  <div>
+                    <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wider mb-1.5">Registration Code (Read-Only)</label>
+                    <input 
+                      type="text" 
+                      value={profileForm.code} 
+                      readOnly 
+                      className="w-full rounded-xl border-slate-100 bg-slate-100 text-xs font-mono font-bold text-slate-500 p-3 cursor-not-allowed border" 
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <button 
+                      type="button" 
+                      onClick={() => setInnerEditMode(false)}
+                      className="flex-1 py-3 border border-slate-200 text-slate-700 font-bold rounded-xl text-xs hover:bg-slate-50 cursor-pointer"
+                    >
+                      View Profile Card
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="flex-1 py-3 bg-violet-900 text-white font-bold rounded-xl text-xs hover:bg-violet-950 shadow-md cursor-pointer"
+                    >
+                      Save Settings
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                /* --- EXACT HIGH-FIDELITY VIEW MODE INSPIRED FROM USER HTML --- */
+                <div className="space-y-6">
+                  
+                  {/* Profile Header Section */}
+                  <section className="bg-white/85 border border-white/50 backdrop-blur-xl rounded-2xl p-6 text-center shadow-sm relative overflow-hidden">
+                    <div className="relative inline-block mb-4">
+                      <div className="w-28 h-36 mx-auto rounded-xl overflow-hidden border-4 border-white shadow-md">
+                        <img 
+                          className="w-full h-full object-cover" 
+                          alt="Student Portrait" 
+                          referrerPolicy="no-referrer"
+                          src={adminInfo.avatar} 
+                        />
+                      </div>
+                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#ffffff] border border-slate-200/55 px-3 py-1 rounded-full shadow-sm">
+                        <span className="text-[10px] font-bold text-emerald-800 tracking-widest">ACTIVE</span>
+                      </div>
+                    </div>
+                    <h2 className="text-xl font-extrabold text-slate-900 tracking-tight leading-tight mt-1">
+                      {profileForm.nameEn} {profileForm.nameKh}
+                    </h2>
+                    
+                    <div className="mt-5 flex flex-col gap-2 text-xs">
+                      <div className="flex items-center justify-between p-3 bg-slate-50/80 rounded-xl border border-slate-100 animate-pulse-subtle">
+                        <div className="flex items-center gap-2 text-slate-500">
+                          <Star className="w-4 h-4 text-violet-700 fill-violet-700 animate-spin-slow" />
+                          <span className="font-semibold text-slate-500">Code</span>
+                        </div>
+                        <span className="font-bold text-slate-900 font-mono">{profileForm.code}</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-slate-50/80 rounded-xl border border-slate-100">
+                        <div className="flex items-center gap-2 text-slate-500">
+                          <Fingerprint className="w-4 h-4 text-violet-700" />
+                          <span className="font-semibold text-slate-500">Biometric Alignment</span>
+                        </div>
+                        <span className="font-bold text-slate-900 font-mono">{profileForm.biometric}</span>
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* Personal & Contact Section */}
+                  <section className="bg-white/85 border border-white/50 backdrop-blur-xl rounded-2xl p-5 shadow-sm space-y-4">
+                    <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                      <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Personal &amp; Contact</h3>
+                      <span className="text-[10px] font-extrabold text-[#797584]">Joined Dec 2025</span>
+                    </div>
+
+                    <div className="space-y-3.5 text-xs">
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5 text-slate-500 font-semibold">
+                          <Cake className="w-4 h-4 text-orange-500 shrink-0" />
+                          <span>Birthday</span>
+                        </div>
+                        <span className="font-extrabold text-slate-900">{profileForm.birthday}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5 text-slate-500 font-semibold">
+                          <PhoneCall className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>Phone</span>
+                        </div>
+                        <span className="font-extrabold text-slate-900">{profileForm.phone}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5 text-slate-500 font-semibold">
+                          <Mail className="w-4 h-4 text-blue-500 shrink-0" />
+                          <span>Account Email</span>
+                        </div>
+                        <span className="font-extrabold text-slate-900">{profileForm.email}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5 text-slate-500 font-semibold">
+                          <Users className="w-4 h-4 text-violet-500 shrink-0" />
+                          <span>Father's Name</span>
+                        </div>
+                        <span className="font-extrabold text-slate-900">{profileForm.fatherName}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5 text-slate-500 font-semibold">
+                          <Users className="w-4 h-4 text-pink-500 shrink-0" />
+                          <span>Mother's Name</span>
+                        </div>
+                        <span className="font-extrabold text-slate-900">{profileForm.motherName}</span>
+                      </div>
+
+                      <div className="flex items-start justify-between border-t border-slate-100 pt-3">
+                        <div className="flex items-center gap-2.5 text-slate-500 font-semibold">
+                          <MapPin className="w-4 h-4 text-red-500 shrink-0" />
+                          <span>Address</span>
+                        </div>
+                        <span className="font-extrabold text-slate-900 Khmer-text text-right max-w-[200px]">{profileForm.address}</span>
+                      </div>
+
+                    </div>
+                  </section>
+
+                  {/* Enrollment Section */}
+                  <section className="bg-white/85 border border-white/50 backdrop-blur-xl rounded-2xl p-5 shadow-sm space-y-3">
+                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-1">Enrollment Settings</h3>
+                    <div className="space-y-3 text-xs">
+                      <div className="flex justify-between items-center pb-2.5 border-b border-slate-100">
+                        <span className="text-slate-500 font-semibold">Class Assigned</span>
+                        <span className="font-extrabold text-violet-900 bg-violet-50 px-2.5 py-0.5 rounded-md border border-violet-100">{profileForm.classLevel}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-500 font-semibold">Subjects Study</span>
+                        <span className="font-extrabold text-violet-900 bg-violet-50 px-2.5 py-0.5 rounded-md border border-violet-100">{profileForm.subject}</span>
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* Lifetime Attendance Section */}
+                  <section className="bg-white/85 border border-white/50 backdrop-blur-xl rounded-2xl p-5 shadow-sm">
+                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-4">Lifetime Attendance Stats</h3>
+                    <div className="grid grid-cols-4 gap-2">
+                      <div className="text-center p-2.5 bg-emerald-50 rounded-xl border border-emerald-100">
+                        <div className="text-base font-black text-emerald-800">109</div>
+                        <div className="text-[10px] text-slate-500 font-semibold mt-0.5">Present</div>
+                      </div>
+                      <div className="text-center p-2.5 bg-yellow-50 rounded-xl border border-yellow-100">
+                        <div className="text-base font-black text-yellow-700">0</div>
+                        <div className="text-[10px] text-slate-500 font-semibold mt-0.5">Late</div>
+                      </div>
+                      <div className="text-center p-2.5 bg-red-50 rounded-xl border border-red-100">
+                        <div className="text-base font-black text-red-650">96</div>
+                        <div className="text-[10px] text-slate-500 font-semibold mt-0.5">Absent</div>
+                      </div>
+                      <div className="text-center p-2.5 bg-blue-50 rounded-xl border border-blue-100">
+                        <div className="text-base font-black text-blue-700">20</div>
+                        <div className="text-[10px] text-slate-500 font-semibold mt-0.5">Excused</div>
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* Student Timetable Section */}
+                  <section className="bg-white/85 border border-white/50 backdrop-blur-xl rounded-2xl p-4 shadow-sm space-y-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Calendar className="w-5 h-5 text-violet-700 animate-bounce-slow" />
+                      <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Enrolled Weekly Schedule</h3>
+                    </div>
+                    
+                    <div className="overflow-x-auto pb-1">
+                      <div className="flex gap-2 min-w-max">
+                        {/* Sunday */}
+                        <div className="flex flex-col items-center gap-1.5 p-1">
+                          <span className="text-[11px] font-bold text-slate-900">Sun</span>
+                          <div className="bg-violet-50/80 p-2 rounded-xl border border-violet-100 text-[10px] text-center w-24">
+                            <div className="font-extrabold text-violet-955 truncate">Combine...</div>
+                            <div className="text-slate-400 mt-0.5">10:00 - 11:00</div>
+                          </div>
+                        </div>
+
+                        {/* Monday */}
+                        <div className="flex flex-col items-center gap-1.5 p-1">
+                          <span className="text-[11px] font-bold text-slate-900">Mon</span>
+                          <div className="bg-violet-50/80 p-2 rounded-xl border border-violet-100 text-[10px] text-center w-24">
+                            <div className="font-extrabold text-violet-955 truncate">HSK 5 - F...</div>
+                            <div className="text-slate-400 mt-0.5">18:00 - 19:00</div>
+                          </div>
+                        </div>
+
+                        {/* Tuesday */}
+                        <div className="flex flex-col items-center gap-1.5 p-1">
+                          <span className="text-[11px] font-bold text-slate-900">Tue</span>
+                          <div className="bg-violet-50/80 p-2 rounded-xl border border-violet-100 text-[10px] text-center w-24">
+                            <div className="font-extrabold text-violet-955 truncate">HSK 5 - F...</div>
+                            <div className="text-slate-400 mt-0.5">18:00 - 19:00</div>
+                          </div>
+                        </div>
+
+                        {/* Wednesday */}
+                        <div className="flex flex-col items-center gap-1.5 p-1">
+                          <span className="text-[11px] font-bold text-slate-900">Wed</span>
+                          <div className="bg-violet-50/80 p-2 rounded-xl border border-violet-100 text-[10px] text-center w-24">
+                            <div className="font-extrabold text-violet-955 truncate">HSK 5 - F...</div>
+                            <div className="text-slate-400 mt-0.5">18:00 - 19:00</div>
+                          </div>
+                        </div>
+
+                        {/* Thursday */}
+                        <div className="flex flex-col items-center gap-1.5 p-1">
+                          <span className="text-[11px] font-bold text-slate-900 font-sans">Thu</span>
+                          <div className="bg-violet-50/80 p-2 rounded-xl border border-violet-100 text-[10px] text-center w-24">
+                            <div className="font-extrabold text-violet-955 truncate">Thu - Ser...</div>
+                            <div className="text-slate-400 mt-0.5">18:00 - 19:00</div>
+                          </div>
+                        </div>
+
+                        {/* Friday */}
+                        <div className="flex flex-col items-center gap-1.5 p-1">
+                          <span className="text-[11px] font-bold text-slate-900">Fri</span>
+                          <div className="bg-violet-50/80 p-2 rounded-xl border border-violet-100 text-[10px] text-center w-24">
+                            <div className="font-extrabold text-violet-955 truncate">HSK 5 - F...</div>
+                            <div className="text-slate-400 mt-0.5">18:00 - 19:00</div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-[#797584] mt-2 text-center italic">Read-only timetable based on enrolled sessions.</p>
+                  </section>
+
+                  {/* Student ID Card Section */}
+                  <section className="bg-white/85 border border-white/50 backdrop-blur-xl rounded-2xl p-4 shadow-sm space-y-4">
+                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2 px-1">Student ID Card (Badging)</h3>
+                    
+                    {/* Simulated visual identity card */}
+                    <div className="w-full bg-gradient-to-br from-white to-[#f0f4ff] rounded-2xl p-5 shadow-lg border border-slate-200/50 relative overflow-hidden flex flex-col justify-between">
+                      {/* Radial decoration element mimics native rendering */}
+                      <div className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-[radial-gradient(circle,rgba(96,22,255,0.03)_0%,transparent_70%)] pointer-events-none"></div>
+                      
+                      <div className="flex justify-between items-start mb-5 z-10">
+                        <div>
+                          <h4 className="text-[13px] font-extrabold text-violet-800 leading-tight">សាលាអសប្បាយសិក្សា</h4>
+                          <p className="text-[11px] font-extrabold text-red-600">喜乐学校夜学班</p>
+                          <p className="text-[9px] font-extrabold text-slate-700 tracking-wider mt-0.5 uppercase">Joy School Night Class</p>
+                        </div>
+                        <div className="bg-violet-900/10 px-2 py-1 text-[9px] font-black text-violet-955 rounded uppercase font-sans">
+                          វេនយប់
+                        </div>
+                      </div>
+
+                      <div className="flex gap-4 z-10">
+                        <div className="w-20 h-28 rounded-lg overflow-hidden border-2 border-white shadow-md bg-white flex-shrink-0">
+                          <img 
+                            className="w-full h-full object-cover" 
+                            alt="Student ID Portrait" 
+                            referrerPolicy="no-referrer"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8QsTVOR_mnHtYYSFvGVqgapfGpL7AiEA6mIq20KASEvOUu5T15jJ61KcA0R2WXPSX4RQNPelZUi6L-R7_C4VZEBvw6hpg8cLsc9aCY_3_mdqA9JuNlvjmG69KLBvMSe6euxYIwZFlgC0LVP_Q6xjZIynd4ZE-yo9Vi93oBzhigx7PHgWdBGkxwIOVacXDuCkCfvNta8v-RZolHFTzJM6y8UNYa74SU7i-Yki9VfZTyoX7RRBVgk3hQfoYAIKYgB_F-h6AWqQ6ZCEE" 
+                          />
+                        </div>
+                        <div className="flex-1 space-y-0.5">
+                          <h5 className="text-[15px] font-extrabold text-slate-900 leading-tight Khmer-text">{profileForm.nameEn}</h5>
+                          <h5 className="text-[14px] font-extrabold text-[#ba1a1a] leading-tight font-sans">{profileForm.nameKh}</h5>
+                          
+                          <div className="space-y-1 pt-3.5 text-[9px]">
+                            <div className="flex justify-between border-b border-dashed border-slate-200 pb-0.5">
+                              <span className="text-slate-400">Code :</span> 
+                              <span className="font-extrabold text-slate-800">{profileForm.code}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-slate-400">Scan :</span> 
+                              <span className="font-extrabold text-slate-800">{profileForm.biometric}</span>
+                            </div>
+                          </div>
+
+                          <div className="pt-3 block">
+                            <span className="inline-flex items-center gap-1 bg-yellow-400/25 text-yellow-900 text-[8px] font-black px-2 py-0.5 rounded-full border border-yellow-400/40">
+                              <Star className="w-2.5 h-2.5 text-yellow-600 fill-yellow-600" />
+                              STUDENT
+                              <Star className="w-2.5 h-2.5 text-yellow-600 fill-yellow-600" />
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-5 flex justify-between items-end border-t border-slate-200/50 pt-3 z-10 text-[9px]">
+                        <div className="space-y-1">
+                          <div className="flex gap-1.5"><span className="text-slate-400">Class :</span> <span className="font-extrabold text-slate-800">{profileForm.classLevel}</span></div>
+                          <div className="flex gap-1.5"><span className="text-slate-400">Subject :</span> <span className="font-extrabold text-[#ba1a1a]">{profileForm.subject}</span></div>
+                          <div className="flex gap-1.5"><span className="text-slate-400">Teacher :</span> <span className="font-extrabold text-slate-800">{profileForm.teacher}</span></div>
+                        </div>
+                        <div className="w-14 h-14 bg-white p-1 rounded-md border border-slate-200/60 shrink-0">
+                          <img 
+                            alt="ID Card Signature QR" 
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_0H9FqLzBSUytiiLKJI-0cn55m9ot7G6AyrA_Ayr9e8oyNUZXzP5IsH148NZDGcDRc18JLpvPKNPBGywbEjJq06PeFM3eIrwWzQ5lu7ObrMwyRIqybMRK-Zr3dEFEgfHVIXO3mBucaiqv8_xTeJf3KM6AwjzPDm3xI4rhU4EF7cAQ3SNxBBgpd1wfGnXWAUuPhFBSkxr5Qcm-fWF0wNsvnQgOdTynMAoo4eyv2b2k_siLof9pizHk4VzMvC9h6r-lqtOUX9hzdnzU" 
+                            className="w-full h-full"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-3.5 border-t border-dashed border-slate-200/60 flex justify-between items-center text-[7.5px] text-[#797584]">
+                        <p className="max-w-[220px] leading-relaxed">អាស័យដ្ឋាន : ផ្ទះលេខ51 ផ្លូវ193/384 សង្កាត់ទួលស្វាយព្រៃ1 ខណ្ឌបឹងកេងកង ភ្នំពេញ</p>
+                        <p className="italic shrink-0">Issued by JoySchool-NightClass</p>
+                      </div>
+                    </div>
+
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setCardToast(true);
+                        triggerFeedback("Successfully prepared Student ID card PDF.");
+                        setTimeout(() => setCardToast(false), 2800);
+                      }}
+                      className="w-full mt-3 flex items-center justify-center gap-2 py-3 px-4 bg-violet-150 hover:bg-violet-200 rounded-xl text-violet-700 font-extrabold text-xs transition-colors border border-violet-200/50"
+                    >
+                      <Download className="w-4 h-4" />
+                      Export this card as PDF
+                    </button>
+                  </section>
+
+                  {/* Latest Attendance Scan Section */}
+                  <section className="bg-white/85 border border-white/50 backdrop-blur-xl rounded-2xl p-5 shadow-sm space-y-4">
+                    <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                      <History className="w-4 h-4 text-violet-700" />
+                      <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Latest Attendance Scan</h3>
+                    </div>
+
+                    <div className="space-y-3.5 text-xs text-slate-600">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 font-semibold">Class</span>
+                        <span className="font-extrabold text-slate-800">{profileForm.classLevel}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 font-semibold">Subject</span>
+                        <span className="font-extrabold text-slate-800">{profileForm.subject}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 font-semibold">Teacher</span>
+                        <span className="font-extrabold text-slate-800">{profileForm.teacher}</span>
+                      </div>
+                      
+                      <div className="pt-3 border-t border-slate-100 space-y-2.5">
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400 font-semibold">Last Scan Date</span>
+                          <span className="font-extrabold text-slate-800">May 25, 2026</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400 font-semibold">Last Check IN</span>
+                          <span className="font-extrabold text-slate-800">May 26, 2026, 05:44 PM</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400 font-semibold">Final Status</span>
+                          <span className="font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded">PRESENT</span>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+
+                </div>
+              )}
+              
+            </div>
+
+            {/* Footer buttons row */}
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200/50 flex justify-end sticky bottom-0 z-20 rounded-b-3xl">
               <button 
                 type="button" 
-                onClick={() => setIsEditing(false)}
-                className="p-1 rounded-full text-slate-400 hover:text-slate-800 cursor-pointer"
+                onClick={() => { setIsEditing(false); setInnerEditMode(false); }}
+                className="px-5 py-2.5 bg-slate-900 text-white hover:bg-slate-950 font-bold text-xs rounded-xl shadow cursor-pointer transition-colors"
               >
-                <X className="w-5 h-5" />
+                Close Settings
               </button>
             </div>
 
-            <form onSubmit={saveProfileChanges} className="space-y-4">
-              
-              {/* Name */}
-              <div>
-                <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wider mb-1.5">Full Legal Name</label>
-                <input 
-                  type="text" 
-                  value={editForm.name} 
-                  required
-                  onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full rounded-xl border-slate-200 text-xs font-bold text-slate-800 p-3 focus:ring-violet-500 focus:border-violet-500" 
-                />
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wider mb-1.5">Email Address</label>
-                <input 
-                  type="email" 
-                  value={editForm.email} 
-                  required
-                  onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full rounded-xl border-slate-200 text-xs font-bold text-slate-800 p-3 focus:ring-violet-500 focus:border-violet-500" 
-                />
-              </div>
-
-              {/* Phone */}
-              <div>
-                <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wider mb-1.5">Contact Phone</label>
-                <input 
-                  type="text" 
-                  value={editForm.phone} 
-                  required
-                  onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
-                  className="w-full rounded-xl border-slate-200 text-xs font-bold text-slate-800 p-3 focus:ring-violet-500 focus:border-violet-500" 
-                />
-              </div>
-
-              {/* Primary Office Location */}
-              <div>
-                <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wider mb-1.5">Primary Office Location</label>
-                <input 
-                  type="text" 
-                  value={editForm.office} 
-                  required
-                  onChange={(e) => setEditForm(prev => ({ ...prev, office: e.target.value }))}
-                  className="w-full rounded-xl border-slate-200 text-xs font-bold text-slate-800 p-3 focus:ring-violet-500 focus:border-violet-500" 
-                />
-              </div>
-
-              {/* Employee ID */}
-              <div>
-                <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wider mb-1.5">Employee ID (Read Only)</label>
-                <input 
-                  type="text" 
-                  value={editForm.employeeId} 
-                  readOnly 
-                  className="w-full rounded-xl border-slate-100 bg-slate-50 text-xs font-mono font-bold text-slate-500 p-3 cursor-not-allowed border" 
-                />
-              </div>
-
-              <div className="flex gap-3 pt-3">
-                <button 
-                  type="button" 
-                  onClick={() => setIsEditing(false)}
-                  className="flex-1 py-3 border border-slate-200 text-slate-700 font-bold rounded-xl text-xs hover:bg-slate-50 cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  className="flex-1 py-3 bg-violet-900 text-white font-bold rounded-xl text-xs hover:bg-violet-950 shadow-md cursor-pointer"
-                >
-                  Save Changes
-                </button>
-              </div>
-
-            </form>
           </div>
         </div>
       )}
